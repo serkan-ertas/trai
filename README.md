@@ -2,6 +2,26 @@
 
 A course-project reproduction of Wang & Ding, *"Exploring the Forgetting in Adversarial Training: A Novel Method for Enhancing Robustness"* (ICLR 2025). The method, **Adaptive Multi-teacher Self-distillation (AMS)**, snapshots the model at fixed intervals during adversarial training and distills from those past snapshots to combat the forgetting of robust features. This repository runs a reduced-scale version (40 epochs, CIFAR-10, PreActResNet-18, ℓ∞ ε=8/255) on a laptop GPU and is **not** trying to match the paper's absolute numbers - the goal is to show the directional improvement of AMS over a TRADES baseline.
 
+## Data & artifacts (Google Drive)
+
+This repository contains **only the code, configs, and scripts** needed to
+reproduce the project. The large/post-run artifacts - the dataset, trained model
+checkpoints, generated results, plots, and the final report - live on Google
+Drive:
+
+**📁 Google Drive:** `https://drive.google.com/drive/folders/13GZHKE4oaYH3RJSr4o0ZmptHr2pX3oD8?usp=sharing`
+
+| Drive folder | Contents | Role |
+|---|---|---|
+| `data/` | CIFAR-10 dataset | *Optional* - auto-downloads on the first training run; included so evaluation can run on the checkpoints without retraining. |
+| `runs/` | TRADES baseline and TRADES+AMS checkpoints, `stage_*_correct_indices.pt`, `metrics.jsonl`, configs, logs | Source of all reported numbers and the forgetting analysis. |
+| `results/` | Generated tables, figures, intermediate eval JSONs | Tables/plots are reproduced by the commands in [Reproducing the results](#reproducing-the-results) |
+
+Two ways to verify the results:
+
+1. **Reproduce from scratch** - follow [Reproducing the results](#reproducing-the-results) below using only this repo (no Drive download needed; the dataset auto-downloads).
+2. **Verify against the provided run** - download `data/` and `runs/` from Drive into the repo root, then run only the evaluation and table/plot commands (steps 3–4) to regenerate `results/` from the trained checkpoints.
+
 ## Hardware requirements
 
 - Target: NVIDIA RTX 3050 Mobile class, ~4 GB VRAM (the original development machine).
@@ -54,7 +74,7 @@ environment activated. This is the exact sequence used to produce the tables and
 plots in `results/`. All training hyperparameters live in the YAML configs; the
 scripts take only the arguments shown.
 
-**1. (Optional) Smoke tests** — fast 1–2 epoch runs that verify the full
+**1. (Optional) Smoke tests** - fast 1–2 epoch runs that verify the full
 pipeline works before committing to the multi-hour training runs.
 
 ```
@@ -80,7 +100,7 @@ python results/scripts/eval_final.py --run trades_ams      --aa_subset 1000
 ```
 
 **4. Build the tables and plots** from the trained runs and eval JSONs. These
-scripts take no arguments — they read `runs/` and `results/scripts/tmp/` directly.
+scripts take no arguments - they read `runs/` and `results/scripts/tmp/` directly.
 
 ```
 python results/scripts/build_eval_table.py          # -> results/tables/final_evaluation.md
@@ -92,10 +112,10 @@ Approximate wall-clock on the reference RTX 3050 Mobile: ~1.5 h per training run
 ~30 min per evaluation (with `--aa_subset 1000`), and seconds for each table/plot
 script.
 
-> **Note — `results/scripts/aa_probe.py` is optional.** It is a one-off AutoAttack
+> **Note - `results/scripts/aa_probe.py` is optional.** It is a one-off AutoAttack
 > timing probe (runs AutoAttack on 100 samples and prints an extrapolated
 > full-test-set wall-time). It is not part of the reproduction pipeline, writes no
-> files, and nothing depends on it — it was only used to decide the `--aa_subset`
+> files, and nothing depends on it - it was only used to decide the `--aa_subset`
 > value. You can ignore it.
 
 ## Outputs
