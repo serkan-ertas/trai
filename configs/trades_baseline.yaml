@@ -1,0 +1,43 @@
+run_id: trades_baseline
+output_dir: runs           # actual run goes to runs/<run_id>/
+seed: 0
+
+data:
+  data_root: ./data
+  batch_size: 128
+  val_size: 1000
+  num_workers: 2
+  download: true
+
+model:
+  num_classes: 10
+
+train:
+  epochs: 40
+  optimizer:
+    lr: 0.1
+    momentum: 0.9
+    nesterov: true
+    weight_decay: 5.0e-4
+  lr_schedule:
+    type: multistep            # MultiStepLR
+    milestones: [30, 36]       # ~75% / 90% of 40 epochs
+    gamma: 0.1
+  amp: true                    # use torch.cuda.amp
+
+attack:
+  train_inner:                 # used as the TRADES inner attack
+    eps: 0.03137254901960784   # 8/255
+    alpha: 0.00784313725490196 # 2/255
+    steps: 5                   # PGD-5 inner (reduced from paper's 10)
+    objective: kl_to_clean
+    random_start: true
+  val_pgd20:                   # used to pick the best checkpoint
+    eps: 0.03137254901960784
+    alpha: 0.00784313725490196
+    steps: 20
+    objective: ce
+    random_start: true
+
+loss:
+  trades_beta: 6.0

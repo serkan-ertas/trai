@@ -1,0 +1,56 @@
+# Smoke config for train_ams.py — verifies the AMS pipeline end-to-end in
+# ~2-3 min on an RTX 3050 Mobile. Production analogue: configs/trades_ams.yaml.
+# Reductions: epochs 40->2, val_size 1000->256, inner PGD 5->2, val PGD 20->5,
+# stage_interval_m 10->1 (2 stages in 2 epochs), snapshot 256->64 samples.
+
+run_id: trades_ams_smoke
+output_dir: runs
+seed: 0
+
+data:
+  data_root: ./data
+  batch_size: 64
+  val_size: 256
+  num_workers: 0
+  download: true
+
+model:
+  num_classes: 10
+
+train:
+  epochs: 2                    # need >= 2 epochs to exercise teacher buffer in epoch 1
+  optimizer:
+    lr: 0.1
+    momentum: 0.9
+    nesterov: true
+    weight_decay: 5.0e-4
+  lr_schedule:
+    type: multistep
+    milestones: [10]
+    gamma: 0.1
+  amp: true
+
+attack:
+  train_inner:
+    eps: 0.03137254901960784
+    alpha: 0.00784313725490196
+    steps: 2
+    objective: kl_to_clean
+    random_start: true
+  val_pgd20:
+    eps: 0.03137254901960784
+    alpha: 0.00784313725490196
+    steps: 5
+    objective: ce
+    random_start: true
+
+loss:
+  trades_beta: 6.0
+
+ams:
+  lam: 0.5
+  rlc_eps: 1.0e-8
+  stage_interval_m: 1          # every epoch is a stage -> 2 stages in 2 epochs
+  forgetting_snapshot:
+    num_samples: 64            # capped to val_size
+    attack_steps: 5            # smoke-fast (production: 20)

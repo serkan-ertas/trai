@@ -1,0 +1,51 @@
+run_id: trades_ams
+output_dir: runs
+seed: 0
+
+data:
+  data_root: ./data
+  batch_size: 128
+  val_size: 1000
+  num_workers: 2
+  download: true
+
+model:
+  num_classes: 10
+
+train:
+  epochs: 40
+  optimizer:
+    lr: 0.1
+    momentum: 0.9
+    nesterov: true
+    weight_decay: 5.0e-4
+  lr_schedule:
+    type: multistep
+    milestones: [30, 36]
+    gamma: 0.1
+  amp: true
+
+attack:
+  train_inner:
+    eps: 0.03137254901960784
+    alpha: 0.00784313725490196
+    steps: 5
+    objective: kl_to_clean
+    random_start: true
+  val_pgd20:
+    eps: 0.03137254901960784
+    alpha: 0.00784313725490196
+    steps: 20
+    objective: ce
+    random_start: true
+
+loss:
+  trades_beta: 6.0
+
+ams:
+  lam: 0.5                     # lambda in Eq. 8
+  rlc_eps: 1.0e-8              # numerical stabilizer
+  stage_interval_m: 10         # snapshot every m epochs (40 / 10 = 4 stages)
+  forgetting_snapshot:
+    num_samples: 256           # cap on samples used for stage-end forgetting eval
+    attack_steps: 20           # PGD steps for the snapshot attack (PGD-20-style)
