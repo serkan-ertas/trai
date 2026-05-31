@@ -1,0 +1,13 @@
+# AMS Adversarial Training — Python dependencies
+# Target: Windows 11, RTX 3050 Mobile (CUDA 12.x), Python 3.10+
+# Install PyTorch wheels from the CUDA index, e.g.:
+#   pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu121
+
+torch==2.3.1
+torchvision==0.18.1
+numpy==1.26.4
+pyyaml==6.0.1
+tqdm==4.66.4
+matplotlib==3.8.4
+autoattack @ git+https://github.com/fra31/auto-attack.git@master
+pytest==8.2.2
