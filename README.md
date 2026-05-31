@@ -92,6 +92,12 @@ Approximate wall-clock on the reference RTX 3050 Mobile: ~1.5 h per training run
 ~30 min per evaluation (with `--aa_subset 1000`), and seconds for each table/plot
 script.
 
+> **Note — `results/scripts/aa_probe.py` is optional.** It is a one-off AutoAttack
+> timing probe (runs AutoAttack on 100 samples and prints an extrapolated
+> full-test-set wall-time). It is not part of the reproduction pipeline, writes no
+> files, and nothing depends on it — it was only used to decide the `--aa_subset`
+> value. You can ignore it.
+
 ## Outputs
 
 Each training run writes to its own directory under `runs/<run_id>/`:
