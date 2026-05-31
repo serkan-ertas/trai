@@ -47,28 +47,50 @@ trai/
 
 `src/`, `configs/`, `tests/`, `runs/`, and `results/` are populated by later phases of the project and may not exist on a fresh clone.
 
-## How to run
+## Reproducing the results
 
+Run the following commands in order from the repository root, with the virtual
+environment activated. This is the exact sequence used to produce the tables and
+plots in `results/`. All training hyperparameters live in the YAML configs; the
+scripts take only the arguments shown.
 
-- Train the TRADES baseline:
+**1. (Optional) Smoke tests** — fast 1–2 epoch runs that verify the full
+pipeline works before committing to the multi-hour training runs.
 
-  ```
-  python -m src.experiments.train_trades --config configs/trades_baseline.yaml
-  ```
+```
+python -m src.experiments.train_trades --config configs/trades_baseline_smoke.yaml
+python -m src.experiments.train_ams    --config configs/trades_ams_smoke.yaml
+```
 
-- Train TRADES + AMS (Algorithm 1 from the paper):
+**2. Train both models** (40 epochs each; CIFAR-10 is downloaded automatically
+on the first run). On an RTX 3050 Mobile this is the bulk of the wall-clock time.
 
-  ```
-  python -m src.experiments.train_ams --config configs/trades_ams.yaml
-  ```
+```
+python -m src.experiments.train_trades --config configs/trades_baseline.yaml
+python -m src.experiments.train_ams    --config configs/trades_ams.yaml
+```
 
-- Evaluate a completed run against PGD-20, CW-20, and AutoAttack:
+**3. Evaluate** each best checkpoint against Clean / PGD-20 / CW-20 / AutoAttack.
+`--aa_subset 1000` runs AutoAttack on the first 1000 test samples (~26 min each);
+use `--aa_subset 0` for the full 10k test set (~4.5 h each).
 
-  ```
-  python -m src.experiments.evaluate --run runs/<run_id>
-  ```
+```
+python results/scripts/eval_final.py --run trades_baseline --aa_subset 1000
+python results/scripts/eval_final.py --run trades_ams      --aa_subset 1000
+```
 
-Each script accepts only `--config` and run-identifier arguments; all hyperparameters live in the YAML.
+**4. Build the tables and plots** from the trained runs and eval JSONs. These
+scripts take no arguments — they read `runs/` and `results/scripts/tmp/` directly.
+
+```
+python results/scripts/build_eval_table.py          # -> results/tables/final_evaluation.md
+python results/scripts/compute_faa_ff.py            # -> forgetting table + stage plot
+python results/scripts/plot_robust_overfitting.py   # -> robust-overfitting plot + best-vs-final table
+```
+
+Approximate wall-clock on the reference RTX 3050 Mobile: ~1.5 h per training run,
+~30 min per evaluation (with `--aa_subset 1000`), and seconds for each table/plot
+script.
 
 ## Outputs
 
