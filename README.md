@@ -123,7 +123,7 @@ script.
 Each training run writes to its own directory under `runs/<run_id>/`:
 
 - `config.yaml` - frozen copy of the config used.
-- `metrics.jsonl` - one JSON line per epoch with `train_loss`, `train_robust_acc`, `val_clean_acc`, `val_pgd20_acc`, `lr`, `wall_time_s`.
+- `metrics.jsonl` - one JSON line per epoch with `epoch`, `lr`, `train_loss_ce`, `train_loss_kl`, `train_acc_clean`, `val_acc_clean`, `val_robust_acc`, `train_time_sec`.
 - `checkpoint_best.pt` - model state with the highest PGD-20 validation robust accuracy seen so far.
 - `checkpoint_final.pt` - model state at the last epoch.
 
